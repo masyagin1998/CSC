@@ -25,7 +25,7 @@ $ cd CSC
 $ make
 ```
 
-### HowTo
+### What can it do?
 
 `CSC` supports simplified version of `C89` with:
  - `int` variables definitions;
@@ -34,3 +34,17 @@ $ make
  - all arithmetical and logical operations;
  - inner compound statements;
  - and many other;
+ 
+### Lexer
+
+Linear Object-oriented lexer with error recovery and comments ignoring.
+
+### Parser
+
+Recursive top-down parser (I know it is shitty, but OK for small projects) for simplified to `LL(1)` C grammar, which turns lexemas to abstract syntax tree.
+
+### Codegenerator
+
+Codegenerator to `LLVM IR BitCode` from abstract syntax tree.
+
+### SSA-builder
