@@ -17,17 +17,18 @@ ASS_STMT_AST*ASS_STMT_AST::read(TOKEN**tok, LEXER*lexer)
     *ass_op = (*tok)->get_tag();
     delete (*tok);
     (*tok) = lexer->next_token();
-    LOGICAL_OR_EXPR_AST*expr;
     try {
-        expr = LOGICAL_OR_EXPR_AST::read(tok, lexer);
+        LOGICAL_OR_EXPR_AST*expr = LOGICAL_OR_EXPR_AST::read(tok, lexer);
+        return new ASS_STMT_AST(ident, ass_op, expr);
     } catch (PARSER_EXCEPTION &excp) {
         excp.prepend_exception("assign->");
     }
-    return new ASS_STMT_AST(ident, ass_op, expr);
 }
 
 ASS_STMT_AST::ASS_STMT_AST(IDENT_AST*ident, DOMAIN_TAG*ass_op, LOGICAL_OR_EXPR_AST*expr) : ident(ident), ass_op(ass_op), expr(expr) {}
 
+IDENT_AST*ASS_STMT_AST::get_ident() { return ident; }
+DOMAIN_TAG*ASS_STMT_AST::get_ass_op() { return ass_op; }
 LOGICAL_OR_EXPR_AST*ASS_STMT_AST::get_expr() { return expr; }
 
 ASS_STMT_AST::~ASS_STMT_AST()
@@ -46,6 +47,33 @@ std::ostream& operator<<(std::ostream &strm, ASS_STMT_AST &ass_stmt)
 
     strm << tabs_str << "ASS_STMT BEGIN:" << std::endl;
 
+    // ident.
+    ass_stmt.ident->add_tab(ass_stmt.tabs + 1);
+    strm << *(ass_stmt.ident);
+    ass_stmt.ident->del_tab(ass_stmt.tabs + 1);
+    switch (*(ass_stmt.get_ass_op())) {
+    case DOMAIN_TAG::ASSIGN:
+        strm << tabs_str << "=" << std::endl;
+        break;
+    case DOMAIN_TAG::ASSIGN_PLUS:
+        strm << tabs_str << "+=" << std::endl;
+        break;
+    case DOMAIN_TAG::ASSIGN_MINUS:
+        strm << tabs_str << "-=" << std::endl;
+        break;
+    case DOMAIN_TAG::ASSIGN_MUL:
+        strm << tabs_str << "*=" << std::endl;
+        break;
+    case DOMAIN_TAG::ASSIGN_DIV:
+        strm << tabs_str << "/=" << std::endl;
+        break;
+    case DOMAIN_TAG::ASSIGN_MOD:
+        strm << tabs_str << "%=" << std::endl;
+        break;
+    default:
+        // do nothing.
+        break;
+    }
     // expr.
     ass_stmt.expr->add_tab(ass_stmt.tabs + 1);
     strm << *(ass_stmt.expr);

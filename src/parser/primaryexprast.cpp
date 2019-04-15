@@ -6,7 +6,6 @@
 
 PRIMARY_EXPR_AST*PRIMARY_EXPR_AST::read(TOKEN**tok, LEXER*lexer)
 {
-    std::cout << "HEH" << std::endl;
     if ((*tok)->get_tag() == DOMAIN_TAG::IDENT) {
         std::string ident = (dynamic_cast<IDENT_TOKEN*>((*tok)))->get_ident();
         delete (*tok);

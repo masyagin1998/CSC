@@ -32,10 +32,10 @@ PRIMARY_EXPR_AST*LEFT_UNARY_EXPR_AST::get_first() { return first; };
 
 LEFT_UNARY_EXPR_AST::~LEFT_UNARY_EXPR_AST()
 {
-    delete first;
     if (left_unary_op != nullptr) {
         delete left_unary_op;
     }
+    delete first;
 }
 
 std::ostream& operator<<(std::ostream &strm, LEFT_UNARY_EXPR_AST &expr)
@@ -54,6 +54,9 @@ std::ostream& operator<<(std::ostream &strm, LEFT_UNARY_EXPR_AST &expr)
             break;
         case DOMAIN_TAG::MINUS:
             strm << tabs_str << "-" << std::endl;
+            break;
+        case DOMAIN_TAG::LOGICAL_NOT:
+            strm << tabs_str << "!" << std::endl;
             break;
         default:
             // do nothing.

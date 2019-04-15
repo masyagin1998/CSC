@@ -14,7 +14,9 @@
 
 <decl> ::= <datatype> <ident> = <logical_or_expr> ; | <datatype> <ident> ;
 
-<stmt> ::=  <ass_stmt> ; | <loop_stmt> | <if_stmt> | <compound_stmt> | <return_stmt> ;
+// <stmt> ::=  <ass_stmt> ; | <for_stmt> | <while_stmt> | <do_while_stmt> | <if_stmt> | <compound_stmt> | <return_stmt> ;
+
+<stmt> ::=  <ass_stmt> ; | <while_stmt> | <if_stmt> | <compound_stmt> | <return_stmt> ;
 
 <ass_stmt> ::= <ident> <assign> <logical_or_expr>
 
@@ -50,18 +52,14 @@
 
 <primary_expr> ::= <ident> | <integer> | ( <logical_or_expr> )
 
-<loop_stmt> ::= <for_stmt> | <while_stmt> | <do_while_stmt>
-
 <for_stmt> ::= for ( <ass_stmt> ; <logical_or_expr> ; <ass_stmt> ) <compound_stmt>
 
-<while_stmt> ::= while ( <logical_or_expr> ) <stmt>
+<while_stmt> ::= while ( <logical_or_expr> ) <compound_stmt>
 
-<do_while_stmt> ::= do ( <logical_or_expr> ) <stmt>
+<do_while_stmt> ::= do ( <logical_or_expr> ) <compound_stmt>
 
-<if_stmt> ::= <only_if_stmt> | <if_else_stmt>
+<if_stmt> ::= <only_if_stmt> else <compound_stmt> | <only_if_stmt> else <if_stmt> | <only_if_stmt>
 
-<only_if_stmt> ::= if ( <logical_or_expr> ) <stmt>
-
-<if_else_stmt> ::= if ( <logical_or_expr> ) <stmt> else <stmt>
+<only_if_stmt> ::= if ( <logical_or_expr> ) <compound_stmt>
 
 <return_stmt> ::= return <logical_or_expr>

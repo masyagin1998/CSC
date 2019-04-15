@@ -142,6 +142,7 @@ int main(int argc, char**argv)
     UNIT_AST*unit = parser.get_unit();
     if (compiler_option == COMPILER_OPTION::PARSE) {
         std::cout << *unit << std::endl;
+        delete unit;
         return 0;
     }
     CODEGEN codegen = CODEGEN(unit);
