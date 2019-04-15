@@ -1,0 +1,67 @@
+<unit> ::= <func>*
+
+<func> ::= <datatype> <ident> <args_list> <compound_stmt>
+
+<datatype> ::= int
+
+<args_list> ::= () | ( <args> )
+
+<args> ::= <arg> | <arg>, <args>
+
+<arg> ::= <datatype> <ident>
+
+<compound_stmt> ::= { <decl>* <stmt>* }
+
+<decl> ::= <datatype> <ident> = <logical_or_expr> ; | <datatype> <ident> ;
+
+<stmt> ::=  <ass_stmt> ; | <loop_stmt> | <if_stmt> | <compound_stmt> | <return_stmt> ;
+
+<ass_stmt> ::= <ident> <assign> <logical_or_expr>
+
+<assign> ::= = | += | -= | *= | /= | %=
+
+<logical_or_expr> ::= <logical_and_expr> | <logical_and_expr> || <logical_or_expr>
+
+<logical_and_expr> ::= <eq_expr> | <eq_expr> && <logical_and_expr>
+
+<eq_expr> ::= <relational_expr> | <relational_expr> <eq_op> <eq_expr>
+
+<eq_op> ::= == | !=
+
+<relational_expr> ::= <add_expr> | <add_expr> <rel_op> <relational_expr>
+
+<rel_op> ::= > | < | >= | <=
+
+<add_expr> ::= <mult_expr> | <mult_expr> <add_op> <add_expr>
+
+<add_op> ::= + | -
+
+<mult_expr> ::= <left_unary_expr> | <left_unary_expr> <mult_op> <mult_expr>
+
+<mult_op> =  * | / | %
+
+<left_unary_expr> ::= <left_unary_op> <primary_expr> | <primary_expr>
+
+// <left_unary_expr> ::= <left_unary_op> <right_unary_expr> | <right_unary_expr>
+
+// <left_unary_op> ::= ++ | -- | + | -
+
+// <right_unary_expr> ::= <primary_expr> <right_unary_op> | <primary_expr>
+
+<primary_expr> ::= <ident> | <integer> | ( <logical_or_expr> )
+
+<loop_stmt> ::= <for_stmt> | <while_stmt> | <do_while_stmt>
+
+<for_stmt> ::= for ( <ass_stmt> ; <logical_or_expr> ; <ass_stmt> ) <compound_stmt>
+
+<while_stmt> ::= while ( <logical_or_expr> ) <stmt>
+
+<do_while_stmt> ::= do ( <logical_or_expr> ) <stmt>
+
+<if_stmt> ::= <only_if_stmt> | <if_else_stmt>
+
+<only_if_stmt> ::= if ( <logical_or_expr> ) <stmt>
+
+<if_else_stmt> ::= if ( <logical_or_expr> ) <stmt> else <stmt>
+
+<return_stmt> ::= return <logical_or_expr>
