@@ -22,6 +22,7 @@ ASS_STMT_AST*ASS_STMT_AST::read(TOKEN**tok, LEXER*lexer)
         return new ASS_STMT_AST(ident, ass_op, expr);
     } catch (PARSER_EXCEPTION &excp) {
         excp.prepend_exception("assign->");
+        throw excp;
     }
 }
 
@@ -33,9 +34,9 @@ LOGICAL_OR_EXPR_AST*ASS_STMT_AST::get_expr() { return expr; }
 
 ASS_STMT_AST::~ASS_STMT_AST()
 {
-    if (expr) {
-        delete expr;
-    }
+    delete ident;
+    delete ass_op;
+    delete expr;
 }
 
 std::ostream& operator<<(std::ostream &strm, ASS_STMT_AST &ass_stmt)

@@ -12,18 +12,15 @@
 class EQ_EXPR_AST : public AST
 {
   private:
-    REL_EXPR_AST*first;
-    DOMAIN_TAG*eq_op;
-    EQ_EXPR_AST*second;
+    std::vector<std::pair<REL_EXPR_AST*, DOMAIN_TAG>> rel_exprs;
 
   public:
     static EQ_EXPR_AST*read(TOKEN**tok, LEXER*lexer);
     
-    EQ_EXPR_AST(REL_EXPR_AST*first, DOMAIN_TAG*eq_op, EQ_EXPR_AST*second);
+    EQ_EXPR_AST(std::vector<std::pair<REL_EXPR_AST*, DOMAIN_TAG>> rel_exprs);
 
-    REL_EXPR_AST*get_first();
-    DOMAIN_TAG*get_eq_op();
-    EQ_EXPR_AST*get_second();
+    std::vector<std::pair<REL_EXPR_AST*, DOMAIN_TAG>> get_rel_exprs();
+    void set_rel_exprs(std::vector<std::pair<REL_EXPR_AST*, DOMAIN_TAG>> rel_exprs);
 
     ~EQ_EXPR_AST();
 

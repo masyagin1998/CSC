@@ -3,14 +3,18 @@
 RET_STMT_AST*RET_STMT_AST::read(TOKEN**tok, LEXER*lexer)
 {
     if ((*tok)->get_tag() != DOMAIN_TAG::RETURN) {
-        // TODO: throw exception.
+        throw PARSER_EXCEPTION("bad beginning of return statement at");
     }
     delete (*tok);
     (*tok) = lexer->next_token();
-    
-    LOGICAL_OR_EXPR_AST*expr = LOGICAL_OR_EXPR_AST::read(tok, lexer);
-    
-    return new RET_STMT_AST(expr);
+
+    try {
+        LOGICAL_OR_EXPR_AST*expr = LOGICAL_OR_EXPR_AST::read(tok, lexer);
+        return new RET_STMT_AST(expr);
+    } catch (PARSER_EXCEPTION &excp) {
+        excp.prepend_exception("ret_stmt->");
+        throw excp;
+    }
 }
 
 RET_STMT_AST::RET_STMT_AST(LOGICAL_OR_EXPR_AST*expr) : expr(expr) {}

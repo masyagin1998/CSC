@@ -16,18 +16,15 @@ class REL_EXPR_AST;
 class REL_EXPR_AST : public AST
 {
   private:
-    ADD_EXPR_AST*first;
-    DOMAIN_TAG*rel_op;
-    REL_EXPR_AST*second;
+    std::vector<std::pair<ADD_EXPR_AST*, DOMAIN_TAG>> add_exprs;
 
   public:
     static REL_EXPR_AST*read(TOKEN**tok, LEXER*lexer);
     
-    REL_EXPR_AST(ADD_EXPR_AST*first, DOMAIN_TAG*rel_op, REL_EXPR_AST*second);
+    REL_EXPR_AST(std::vector<std::pair<ADD_EXPR_AST*, DOMAIN_TAG>> rel_exprs);
 
-    ADD_EXPR_AST*get_first();
-    DOMAIN_TAG*get_rel_op();
-    REL_EXPR_AST*get_second();
+    std::vector<std::pair<ADD_EXPR_AST*, DOMAIN_TAG>> get_add_exprs();
+    void set_add_exprs(std::vector<std::pair<ADD_EXPR_AST*, DOMAIN_TAG>> add_exprs);
 
     ~REL_EXPR_AST();
 

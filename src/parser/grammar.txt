@@ -22,23 +22,23 @@
 
 <assign> ::= = | += | -= | *= | /= | %=
 
-<logical_or_expr> ::= <logical_and_expr> | <logical_and_expr> || <logical_or_expr>
+<logical_or_expr> ::= <logical_and_expr> {|| <logical_or_expr>}*
 
-<logical_and_expr> ::= <eq_expr> | <eq_expr> && <logical_and_expr>
+<logical_and_expr> ::= <eq_expr> {&& <logical_and_expr>}*
 
-<eq_expr> ::= <relational_expr> | <relational_expr> <eq_op> <eq_expr>
+<eq_expr> ::= <relational_expr> {<eq_op> <eq_expr>}*
 
 <eq_op> ::= == | !=
 
-<relational_expr> ::= <add_expr> | <add_expr> <rel_op> <relational_expr>
+<relational_expr> ::= <add_expr> {<rel_op> <relational_expr>}*
 
 <rel_op> ::= > | < | >= | <=
 
-<add_expr> ::= <mult_expr> | <mult_expr> <add_op> <add_expr>
+<add_expr> ::= <mult_expr> {<add_op> <add_expr>}*
 
 <add_op> ::= + | -
 
-<mult_expr> ::= <left_unary_expr> | <left_unary_expr> <mult_op> <mult_expr>
+<mult_expr> ::= <left_unary_expr> {<mult_op> <mult_expr>}*
 
 <mult_op> =  * | / | %
 

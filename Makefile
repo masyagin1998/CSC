@@ -56,22 +56,54 @@ $(CODEGEN_OBJS_PREFIX)%.o: $(CODEGEN_SRC_PREFIX)%.cpp $(CODEGEN_SRC_PREFIX)%.hpp
 	mkdir -p $(CODEGEN_OBJS_PREFIX)
 	$(CC) $(CFLAGS) $(LLVMFLAGS) -I$(LEXER_SRC_PREFIX) -I$(PARSER_SRC_PREFIX) -c $< -o $@
 
+IRBUILDER_SRC_PREFIX=$(SRC_PREFIX)irbuilder/
+IRBUILDER_SRC=$(shell find $(IRBUILDER_SRC_PREFIX) -maxdepth 1 -name '*.cpp')
+IRBUILDER_OBJS_PREFIX=$(OBJS_PREFIX)irbuilder/
+IRBUILDER_OBJS=$(patsubst $(IRBUILDER_SRC_PREFIX)%.cpp,$(IRBUILDER_OBJS_PREFIX)%.o,$(IRBUILDER_SRC))
+IRBUILDER_LIB_PREFIX=$(LIBS_PREFIX)irbuilder/
+IRBUILDER_LIB=$(IRBUILDER_LIB_PREFIX)irbuilder.a
+
+$(IRBUILDER_LIB): $(IRBUILDER_OBJS)
+	mkdir -p $(IRBUILDER_LIB_PREFIX)
+	ar rcs $@ $^
+
+$(IRBUILDER_OBJS_PREFIX)%.o: $(IRBUILDER_SRC_PREFIX)%.cpp $(IRBUILDER_SRC_PREFIX)%.hpp
+	mkdir -p $(IRBUILDER_OBJS_PREFIX)
+	$(CC) $(CFLAGS) $(LLVMFLAGS) -I$(LEXER_SRC_PREFIX) -I$(PARSER_SRC_PREFIX) -c $< -o $@
+
 COMPILER_SRC_PREFIX=$(SRC_PREFIX)
 COMPILER_SRC=$(shell find $(COMPILER_SRC_PREFIX) -maxdepth 1 -name '*.cpp')
 COMPILER_OBJS_PREFIX=$(OBJS_PREFIX)
 COMPILER_OBJS=$(patsubst $(COMPILER_SRC_PREFIX)%.cpp,$(COMPILER_OBJS_PREFIX)%.o,$(COMPILER_SRC))
-COMPILER_INCLUDES=-I$(LEXER_SRC_PREFIX) -I$(PARSER_SRC_PREFIX) -I$(CODEGEN_SRC_PREFIX)
-
-$(BIN_PREFIX)compiler: $(COMPILER_OBJS) $(LEXER_LIB) $(PARSER_LIB) $(CODEGEN_LIB)
-	mkdir -p $(BIN_PREFIX)
-	$(CC) $(CFLAGS) $(LLVMFLAGS) $^ -o $@
+COMPILER_INCLUDES=-I$(LEXER_SRC_PREFIX) -I$(PARSER_SRC_PREFIX) -I$(IRBUILDER_SRC_PREFIX) -I$(CODEGEN_SRC_PREFIX)
 
 $(COMPILER_OBJS_PREFIX)%.o: $(COMPILER_SRC_PREFIX)%.cpp
 	mkdir -p $(COMPILER_OBJS_PREFIX)
 	$(CC) $(CFLAGS) $(LLVMFLAGS) $(COMPILER_INCLUDES) -c $< -o $@
 
+$(BIN_PREFIX)compiler: $(COMPILER_OBJS) $(LEXER_LIB) $(PARSER_LIB) $(CODEGEN_LIB) $(IRBUILDER_LIB)
+	mkdir -p $(BIN_PREFIX)
+	$(CC) $(CFLAGS) $(LLVMFLAGS) $^ -o $@
+
+TEST_SRC_PREFIX=$(SRC_PREFIX)test/
+TEST_SRC=$(shell find $(TEST_SRC_PREFIX) -maxdepth 1 -name '*.c')
+test: $(TEST_SRC)
+	mkdir -p ./debug
+	./bin/compiler -v > ./debug/version.txt
+	./bin/compiler -h > ./debug/help.txt
+	./bin/compiler -p lex     -i ./src/test/test.c -o ./debug/lex.txt
+	./bin/compiler -p parse   -i ./src/test/test.c -o ./debug/parse.txt
+	./bin/compiler -p ir      -i ./src/test/test.c -o ./debug/ir.txt
+	./bin/compiler -p ir      -i ./src/test/test.c -o ./debug/ir.dot -g
+	./bin/compiler -p ssa     -i ./src/test/test.c -o ./debug/ssa.txt
+	./bin/compiler -p ssa     -i ./src/test/test.c -o ./debug/ssa.dot -g
+	./bin/compiler -p codegen -i ./src/test/test.c -o ./debug/codegen.txt >> ./debug/codegen.txt
+	./bin/compiler -i ./src/test/test.c -o ./debug/object.o
+	gcc -g -Wall -Wextra ./src/test/extern.c ./debug/object.o -o ./debug/test
+	./debug/test > ./debug/test.txt
+
 .PHONY: clean
 
 clean:
-	rm -rf $(BIN_PREFIX) $(OBJS_PREFIX) $(LIBS_PREFIX)
+	rm -rf $(BIN_PREFIX) $(OBJS_PREFIX) $(LIBS_PREFIX) ./debug
 

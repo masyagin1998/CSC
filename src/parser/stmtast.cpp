@@ -11,7 +11,7 @@ STMT_AST*STMT_AST::read(TOKEN**tok, LEXER*lexer)
     if ((*tok)->get_tag() == DOMAIN_TAG::IDENT) {
         STMT_AST*stmt = new STMT_AST(ASS_STMT_AST::read(tok, lexer));
         if ((*tok)->get_tag() != DOMAIN_TAG::SEMICOLON) {
-            // TODO: throw exception;
+            throw PARSER_EXCEPTION("bad ending of ass_stmt at");
         }
         delete (*tok);
         (*tok) = lexer->next_token();
@@ -21,7 +21,7 @@ STMT_AST*STMT_AST::read(TOKEN**tok, LEXER*lexer)
     } else if ((*tok)->get_tag() == DOMAIN_TAG::RETURN) {
         STMT_AST*stmt = new STMT_AST(RET_STMT_AST::read(tok, lexer));
         if ((*tok)->get_tag() != DOMAIN_TAG::SEMICOLON) {
-            // TODO: throw exception;
+            throw PARSER_EXCEPTION("bad ending of ret_stmt at");
         }
         delete (*tok);
         (*tok) = lexer->next_token();
@@ -33,12 +33,10 @@ STMT_AST*STMT_AST::read(TOKEN**tok, LEXER*lexer)
     } else if ((*tok)->get_tag() == DOMAIN_TAG::DO) {
         // return new DO_WHILE_STMT_AST(DO_WHILE_STMT_AST::read(tok, lexer)); // TODO.
     }  else if ((*tok)->get_tag() == DOMAIN_TAG::IF) {
-        // return new STMT_AST(IF_STMT_AST::read(tok, lexer));
+        return new STMT_AST(IF_STMT_AST::read(tok, lexer));
     }
 
-    // TODO: throw exception.
-
-    return nullptr;
+    throw PARSER_EXCEPTION("unknown stmt at");
 }
 
 STMT_AST::STMT_AST(AST*stmt) :
@@ -63,6 +61,7 @@ std::ostream& operator<<(std::ostream &strm, STMT_AST &stmt)
     COMPOUND_STMT_AST*comp_stmt;
     RET_STMT_AST*ret_stmt;
     WHILE_STMT_AST*while_stmt;
+    IF_STMT_AST*if_stmt;
 
     stmt.stmt->add_tab(stmt.tabs + 1);
     if ((ass_stmt = dynamic_cast<ASS_STMT_AST*>(stmt.stmt)) != nullptr) {
@@ -73,6 +72,8 @@ std::ostream& operator<<(std::ostream &strm, STMT_AST &stmt)
         strm << *ret_stmt;
     } else if ((while_stmt = dynamic_cast<WHILE_STMT_AST*>(stmt.stmt)) != nullptr) {
         strm << *while_stmt;
+    } else if ((if_stmt = dynamic_cast<IF_STMT_AST*>(stmt.stmt)) != nullptr) {
+        strm << *if_stmt;
     }
     stmt.stmt->del_tab(stmt.tabs + 1);
     

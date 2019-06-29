@@ -3,27 +3,25 @@
 
 LOGICAL_OR_EXPR_AST*LOGICAL_OR_EXPR_AST::read(TOKEN**tok, LEXER*lexer)
 {
-    LOGICAL_AND_EXPR_AST*first = LOGICAL_AND_EXPR_AST::read(tok, lexer);
-    if ((*tok)->get_tag() != DOMAIN_TAG::LOGICAL_OR) {
-        return new LOGICAL_OR_EXPR_AST(first, nullptr);
-    } else {
+    std::vector<LOGICAL_AND_EXPR_AST*> and_exprs;
+    and_exprs.push_back(LOGICAL_AND_EXPR_AST::read(tok, lexer));
+    while ((*tok)->get_tag() == DOMAIN_TAG::LOGICAL_OR) {
         delete (*tok);
         (*tok) = lexer->next_token();
-        LOGICAL_OR_EXPR_AST*second = LOGICAL_OR_EXPR_AST::read(tok, lexer);
-        return new LOGICAL_OR_EXPR_AST(first, second);
+        and_exprs.push_back(LOGICAL_AND_EXPR_AST::read(tok, lexer));
     }
+    return new LOGICAL_OR_EXPR_AST(and_exprs);
 }
 
-LOGICAL_OR_EXPR_AST::LOGICAL_OR_EXPR_AST(LOGICAL_AND_EXPR_AST*first, LOGICAL_OR_EXPR_AST*second) : first(first), second(second) {}
+LOGICAL_OR_EXPR_AST::LOGICAL_OR_EXPR_AST(std::vector<LOGICAL_AND_EXPR_AST*> and_exprs) : and_exprs(and_exprs) {}
 
-LOGICAL_AND_EXPR_AST*LOGICAL_OR_EXPR_AST::get_first() { return first; };
-LOGICAL_OR_EXPR_AST*LOGICAL_OR_EXPR_AST::get_second() { return second; };
+std::vector<LOGICAL_AND_EXPR_AST*> LOGICAL_OR_EXPR_AST::get_and_exprs() { return and_exprs; }
+void LOGICAL_OR_EXPR_AST::set_and_exprs(std::vector<LOGICAL_AND_EXPR_AST*> and_exprs) { this->and_exprs = and_exprs; }
 
 LOGICAL_OR_EXPR_AST::~LOGICAL_OR_EXPR_AST()
 {
-    delete first;
-    if (second != nullptr) {
-        delete second;
+    for (std::size_t i = 0; i < and_exprs.size(); i++) {
+        delete and_exprs[i];
     }
 }
 
@@ -35,45 +33,40 @@ std::ostream& operator<<(std::ostream &strm, LOGICAL_OR_EXPR_AST &expr)
     }
     
     strm << tabs_str << "LOGICAL OR EXPR BEGIN:" << std::endl;
-    // first.
-    expr.first->add_tab(expr.tabs + 1);
-    strm << *(expr.first);
-    expr.first->del_tab(expr.tabs + 1);
-    if (expr.second != nullptr) {
+    expr.and_exprs[0]->add_tab(expr.tabs + 1);
+    strm << *(expr.and_exprs[0]);
+    expr.and_exprs[0]->del_tab(expr.tabs + 1);
+    for (std::size_t i = 1; i < expr.and_exprs.size(); i++) {
         strm << tabs_str << "||" << std::endl;
-        // second.
-        expr.second->add_tab(expr.tabs + 1);
-        strm << *(expr.second);
-        expr.second->del_tab(expr.tabs + 1);
+        expr.and_exprs[i]->add_tab(expr.tabs + 1);
+        strm << *(expr.and_exprs[i]);
+        expr.and_exprs[i]->del_tab(expr.tabs + 1);
     }
-    
     strm << tabs_str << "LOGICAL OR EXPR END;" << std::endl;
     return strm;
 }
 
 LOGICAL_AND_EXPR_AST*LOGICAL_AND_EXPR_AST::read(TOKEN**tok, LEXER*lexer)
 {
-    EQ_EXPR_AST*first = EQ_EXPR_AST::read(tok, lexer);
-    if ((*tok)->get_tag() != DOMAIN_TAG::LOGICAL_AND) {
-        return new LOGICAL_AND_EXPR_AST(first, nullptr);
-    } else {
+    std::vector<EQ_EXPR_AST*> eq_exprs;
+    eq_exprs.push_back(EQ_EXPR_AST::read(tok, lexer));
+    while ((*tok)->get_tag() == DOMAIN_TAG::LOGICAL_AND) {
         delete (*tok);
         (*tok) = lexer->next_token();
-        LOGICAL_AND_EXPR_AST*second = LOGICAL_AND_EXPR_AST::read(tok, lexer);
-        return new LOGICAL_AND_EXPR_AST(first, second);
+        eq_exprs.push_back(EQ_EXPR_AST::read(tok, lexer));
     }
+    return new LOGICAL_AND_EXPR_AST(eq_exprs);
 }
 
-LOGICAL_AND_EXPR_AST::LOGICAL_AND_EXPR_AST(EQ_EXPR_AST*first, LOGICAL_AND_EXPR_AST*second) : first(first), second(second) {}
+LOGICAL_AND_EXPR_AST::LOGICAL_AND_EXPR_AST(std::vector<EQ_EXPR_AST*> eq_exprs) : eq_exprs(eq_exprs) {}
 
-EQ_EXPR_AST*LOGICAL_AND_EXPR_AST::get_first() { return first; };
-LOGICAL_AND_EXPR_AST*LOGICAL_AND_EXPR_AST::get_second() { return second; };
+std::vector<EQ_EXPR_AST*> LOGICAL_AND_EXPR_AST::get_eq_exprs() { return eq_exprs; }
+void LOGICAL_AND_EXPR_AST::set_eq_exprs(std::vector<EQ_EXPR_AST*> eq_exprs) { this->eq_exprs = eq_exprs; }
 
 LOGICAL_AND_EXPR_AST::~LOGICAL_AND_EXPR_AST()
 {
-    delete first;
-    if (second != nullptr) {
-        delete second;
+    for (std::size_t i = 0; i < eq_exprs.size(); i++) {
+        delete eq_exprs[i];
     }
 }
 
@@ -85,18 +78,15 @@ std::ostream& operator<<(std::ostream &strm, LOGICAL_AND_EXPR_AST &expr)
     }
     
     strm << tabs_str << "LOGICAL AND EXPR BEGIN:" << std::endl;
-    // first.
-    expr.first->add_tab(expr.tabs + 1);
-    strm << *(expr.first);
-    expr.first->del_tab(expr.tabs + 1);
-    if (expr.second != nullptr) {
+    expr.eq_exprs[0]->add_tab(expr.tabs + 1);
+    strm << *(expr.eq_exprs[0]);
+    expr.eq_exprs[0]->del_tab(expr.tabs + 1);
+    for (std::size_t i = 1; i < expr.eq_exprs.size(); i++) {
         strm << tabs_str << "&&" << std::endl;
-        // second.
-        expr.second->add_tab(expr.tabs + 1);
-        strm << *(expr.second);
-        expr.second->del_tab(expr.tabs + 1);
+        expr.eq_exprs[i]->add_tab(expr.tabs + 1);
+        strm << *(expr.eq_exprs[i]);
+        expr.eq_exprs[i]->del_tab(expr.tabs + 1);
     }
-    
     strm << tabs_str << "LOGICAL AND EXPR END;" << std::endl;
     return strm;
 }

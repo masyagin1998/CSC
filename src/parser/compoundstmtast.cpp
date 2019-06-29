@@ -3,7 +3,7 @@
 COMPOUND_STMT_AST*COMPOUND_STMT_AST::read(TOKEN**tok, LEXER*lexer)
 {
     if ((*tok)->get_tag() != DOMAIN_TAG::LBRACE) {
-        // TODO: throw exception.
+        throw PARSER_EXCEPTION("bad beginning of comp_stmt at");
     }
     delete (*tok);
     (*tok) = lexer->next_token();
@@ -18,7 +18,6 @@ COMPOUND_STMT_AST*COMPOUND_STMT_AST::read(TOKEN**tok, LEXER*lexer)
 
         std::vector<STMT_AST*> stmts;
 
-        // TODO.
         while ((*tok)->get_tag() != DOMAIN_TAG::RBRACE) {
             STMT_AST*stmt = STMT_AST::read(tok, lexer);
             stmts.push_back(stmt);

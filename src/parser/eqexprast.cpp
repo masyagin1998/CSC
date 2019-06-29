@@ -2,37 +2,27 @@
 
 EQ_EXPR_AST*EQ_EXPR_AST::read(TOKEN**tok, LEXER*lexer)
 {
-    REL_EXPR_AST*first = REL_EXPR_AST::read(tok, lexer);
-    if ((*tok)->get_tag() == DOMAIN_TAG::EQ) {
+    std::vector<std::pair<REL_EXPR_AST*, DOMAIN_TAG>> rel_exprs;
+    rel_exprs.push_back(std::make_pair(REL_EXPR_AST::read(tok, lexer), DOMAIN_TAG::END_OF_FILE));
+    while (((*tok)->get_tag() == DOMAIN_TAG::EQ) || ((*tok)->get_tag() == DOMAIN_TAG::NEQ)) {
+        rel_exprs.back().second = (*tok)->get_tag();
         delete (*tok);
         (*tok) = lexer->next_token();
-        DOMAIN_TAG*neq = new DOMAIN_TAG;
-        *neq = DOMAIN_TAG::EQ;
-        return new EQ_EXPR_AST(first, neq, EQ_EXPR_AST::read(tok, lexer));
-    } else if ((*tok)->get_tag() == DOMAIN_TAG::NEQ) {
-        delete (*tok);
-        (*tok) = lexer->next_token();
-        DOMAIN_TAG*eq = new DOMAIN_TAG;
-        *eq = DOMAIN_TAG::NEQ;
-        return new EQ_EXPR_AST(first, eq, EQ_EXPR_AST::read(tok, lexer));
-    } else {
-        return new EQ_EXPR_AST(first, nullptr, nullptr);
+        rel_exprs.push_back(std::make_pair(REL_EXPR_AST::read(tok, lexer), DOMAIN_TAG::END_OF_FILE));
     }
+    return new EQ_EXPR_AST(rel_exprs);
 }
 
-EQ_EXPR_AST::EQ_EXPR_AST(REL_EXPR_AST*first, DOMAIN_TAG*eq_op, EQ_EXPR_AST*second) : first(first), eq_op(eq_op), second(second) {}
+EQ_EXPR_AST::EQ_EXPR_AST(std::vector<std::pair<REL_EXPR_AST*, DOMAIN_TAG>> rel_exprs) : rel_exprs(rel_exprs) {}
 
-REL_EXPR_AST*EQ_EXPR_AST::get_first() { return first; };
-DOMAIN_TAG*EQ_EXPR_AST::get_eq_op() { return eq_op; }
-EQ_EXPR_AST*EQ_EXPR_AST::get_second() { return second; };
+std::vector<std::pair<REL_EXPR_AST*, DOMAIN_TAG>> EQ_EXPR_AST::get_rel_exprs() { return rel_exprs; }
+void EQ_EXPR_AST::set_rel_exprs(std::vector<std::pair<REL_EXPR_AST*, DOMAIN_TAG>> rel_exprs) { this->rel_exprs = rel_exprs; }
 
 EQ_EXPR_AST::~EQ_EXPR_AST()
 {
-    delete first;
-    if (eq_op != nullptr) {
-        delete eq_op;
-        delete second;
-    }
+   for (std::size_t i = 0; i < rel_exprs.size(); i++) {
+       delete rel_exprs[i].first;
+   }
 }
 
 std::ostream& operator<<(std::ostream &strm, EQ_EXPR_AST &expr)
@@ -43,29 +33,19 @@ std::ostream& operator<<(std::ostream &strm, EQ_EXPR_AST &expr)
     }
     
     strm << tabs_str << "EQ EXPR BEGIN:" << std::endl;
-    // first.
-    expr.first->add_tab(expr.tabs + 1);
-    strm << *(expr.first);
-    expr.first->del_tab(expr.tabs + 1);
-    if (expr.eq_op != nullptr) {
-        // eq_op.
-        switch (*expr.eq_op) {
-        case DOMAIN_TAG::EQ:
+    expr.rel_exprs[0].first->add_tab(expr.tabs + 1);
+    strm << *(expr.rel_exprs[0].first);
+    expr.rel_exprs[0].first->del_tab(expr.tabs + 1);
+    for (std::size_t i = 1; i < expr.rel_exprs.size(); i++) {
+        if (expr.rel_exprs[i - 1].second == DOMAIN_TAG::EQ) {
             strm << tabs_str << "==" << std::endl;
-            break;
-        case DOMAIN_TAG::NEQ:
+        } else if (expr.rel_exprs[i - 1].second == DOMAIN_TAG::NEQ) {
             strm << tabs_str << "!=" << std::endl;
-            break;
-        default:
-            // do nothing.
-            break;
         }
-        // second.
-        expr.second->add_tab(expr.tabs + 1);
-        strm << *(expr.second);
-        expr.second->del_tab(expr.tabs + 1);
+        expr.rel_exprs[i].first->add_tab(expr.tabs + 1);
+        strm << *(expr.rel_exprs[i].first);
+        expr.rel_exprs[i].first->del_tab(expr.tabs + 1);
     }
-    
     strm << tabs_str << "EQ EXPR END;" << std::endl;
     return strm;
 }

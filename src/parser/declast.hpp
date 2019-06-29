@@ -28,6 +28,8 @@ class DECL_AST : public AST
     LOGICAL_OR_EXPR_AST*get_expr();
 
     friend std::ostream& operator<<(std::ostream &strm, DECL_AST &decl);
+
+    ~DECL_AST();
 };
 
 #endif  // DECL_AST_HPP_INCLUDED

@@ -15,7 +15,7 @@ UNIT_AST*UNIT_AST::read(TOKEN**tok, LEXER*lexer)
         delete (*tok);
         return new UNIT_AST(funcs);
     } catch (PARSER_EXCEPTION &excp) {
-        std::cerr << excp;
+        std::cerr << excp << std::endl;
         return nullptr;
     }
 }

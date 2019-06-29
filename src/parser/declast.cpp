@@ -76,3 +76,12 @@ std::ostream& operator<<(std::ostream &strm, DECL_AST &decl)
     strm << tabs_str << "DECL END;" << std::endl;
     return strm;
 }
+
+DECL_AST::~DECL_AST()
+{
+    delete datatype;
+    delete ident;
+    if (expr != nullptr) {
+        delete expr;
+    }
+}

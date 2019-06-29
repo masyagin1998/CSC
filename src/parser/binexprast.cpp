@@ -5,37 +5,27 @@
 
 ADD_EXPR_AST*ADD_EXPR_AST::read(TOKEN**tok, LEXER*lexer)
 {
-    MULT_EXPR_AST*first = MULT_EXPR_AST::read(tok, lexer);
-    if ((*tok)->get_tag() == DOMAIN_TAG::PLUS) {
-        DOMAIN_TAG*add_op = new DOMAIN_TAG;
-        *add_op = DOMAIN_TAG::PLUS;
+    std::vector<std::pair<MULT_EXPR_AST*, DOMAIN_TAG>> mult_exprs;
+    mult_exprs.push_back(std::make_pair(MULT_EXPR_AST::read(tok, lexer), DOMAIN_TAG::END_OF_FILE));
+    while (((*tok)->get_tag() == DOMAIN_TAG::PLUS) || ((*tok)->get_tag() == DOMAIN_TAG::MINUS)) {
+        mult_exprs.back().second = (*tok)->get_tag();
         delete (*tok);
         (*tok) = lexer->next_token();
-        return new ADD_EXPR_AST(first, add_op, ADD_EXPR_AST::read(tok, lexer));
-    } else if ((*tok)->get_tag() == DOMAIN_TAG::MINUS) {
-        DOMAIN_TAG*add_op = new DOMAIN_TAG;
-        *add_op = DOMAIN_TAG::MINUS;
-        delete (*tok);
-        (*tok) = lexer->next_token();
-        return new ADD_EXPR_AST(first, add_op, ADD_EXPR_AST::read(tok, lexer));
-    } else {
-        return new ADD_EXPR_AST(first, nullptr, nullptr);
+        mult_exprs.push_back(std::make_pair(MULT_EXPR_AST::read(tok, lexer), DOMAIN_TAG::END_OF_FILE));
     }
+    return new ADD_EXPR_AST(mult_exprs);
 }
 
-ADD_EXPR_AST::ADD_EXPR_AST(MULT_EXPR_AST*first, DOMAIN_TAG*add_op, ADD_EXPR_AST*second) : first(first), add_op(add_op), second(second) {}
+ADD_EXPR_AST::ADD_EXPR_AST(std::vector<std::pair<MULT_EXPR_AST*, DOMAIN_TAG>> mult_exprs) : mult_exprs(mult_exprs) {}
 
-MULT_EXPR_AST*ADD_EXPR_AST::get_first() { return first; };
-DOMAIN_TAG*ADD_EXPR_AST::get_add_op() { return add_op; }
-ADD_EXPR_AST*ADD_EXPR_AST::get_second() { return second; };
+std::vector<std::pair<MULT_EXPR_AST*, DOMAIN_TAG>> ADD_EXPR_AST::get_mult_exprs() { return mult_exprs; }
+void ADD_EXPR_AST::set_mult_exprs(std::vector<std::pair<MULT_EXPR_AST*, DOMAIN_TAG>> mult_exprs) { this->mult_exprs = mult_exprs; }
 
 ADD_EXPR_AST::~ADD_EXPR_AST()
 {
-    delete first;
-    if (add_op != nullptr) {
-        delete add_op;
-        delete second;
-    }
+   for (std::size_t i = 0; i < mult_exprs.size(); i++) {
+       delete mult_exprs[i].first;
+   }
 }
 
 std::ostream& operator<<(std::ostream &strm, ADD_EXPR_AST &expr)
@@ -46,72 +36,48 @@ std::ostream& operator<<(std::ostream &strm, ADD_EXPR_AST &expr)
     }
     
     strm << tabs_str << "ADD EXPR BEGIN:" << std::endl;
-    // first.
-    expr.first->add_tab(expr.tabs + 1);
-    strm << *(expr.first);
-    expr.first->del_tab(expr.tabs + 1);
-    if (expr.add_op != nullptr) {
-        // add_op.
-        switch (*expr.add_op) {
-        case DOMAIN_TAG::PLUS:
+    expr.mult_exprs[0].first->add_tab(expr.tabs + 1);
+    strm << *(expr.mult_exprs[0].first);
+    expr.mult_exprs[0].first->del_tab(expr.tabs + 1);
+    for (std::size_t i = 1; i < expr.mult_exprs.size(); i++) {
+        if (expr.mult_exprs[i - 1].second == DOMAIN_TAG::PLUS) {
             strm << tabs_str << "+" << std::endl;
-            break;
-        case DOMAIN_TAG::MINUS:
+        } else if (expr.mult_exprs[i - 1].second == DOMAIN_TAG::MINUS) {
             strm << tabs_str << "-" << std::endl;
-            break;
-        default:
-            // do nothing.
-            break;
         }
-        // second.
-        expr.second->add_tab(expr.tabs + 1);
-        strm << *(expr.second);
-        expr.second->del_tab(expr.tabs + 1);
+        expr.mult_exprs[i].first->add_tab(expr.tabs + 1);
+        strm << *(expr.mult_exprs[i].first);
+        expr.mult_exprs[i].first->del_tab(expr.tabs + 1);
     }
-    
     strm << tabs_str << "ADD EXPR END;" << std::endl;
     return strm;
 }
 
 MULT_EXPR_AST*MULT_EXPR_AST::read(TOKEN**tok, LEXER*lexer)
 {
-    LEFT_UNARY_EXPR_AST*first = LEFT_UNARY_EXPR_AST::read(tok, lexer);
-    if ((*tok)->get_tag() == DOMAIN_TAG::MUL) {
-        DOMAIN_TAG*mult_op = new DOMAIN_TAG;
-        *mult_op = DOMAIN_TAG::MUL;
+    std::vector<std::pair<LEFT_UNARY_EXPR_AST*, DOMAIN_TAG>> left_unary_exprs;
+    left_unary_exprs.push_back(std::make_pair(LEFT_UNARY_EXPR_AST::read(tok, lexer), DOMAIN_TAG::END_OF_FILE));
+    while (((*tok)->get_tag() == DOMAIN_TAG::MUL) ||
+           ((*tok)->get_tag() == DOMAIN_TAG::DIV) ||
+           ((*tok)->get_tag() == DOMAIN_TAG::MOD)) {
+        left_unary_exprs.back().second = (*tok)->get_tag();
         delete (*tok);
         (*tok) = lexer->next_token();
-        return new MULT_EXPR_AST(first, mult_op, MULT_EXPR_AST::read(tok, lexer));
-    } else if ((*tok)->get_tag() == DOMAIN_TAG::DIV) {
-        DOMAIN_TAG*mult_op = new DOMAIN_TAG;
-        *mult_op = DOMAIN_TAG::DIV;
-        delete (*tok);
-        (*tok) = lexer->next_token();
-        return new MULT_EXPR_AST(first, mult_op, MULT_EXPR_AST::read(tok, lexer));
-    } else if ((*tok)->get_tag() == DOMAIN_TAG::MOD) {
-        DOMAIN_TAG*mult_op = new DOMAIN_TAG;
-        *mult_op = DOMAIN_TAG::MOD;
-        delete (*tok);
-        (*tok) = lexer->next_token();
-        return new MULT_EXPR_AST(first, mult_op, MULT_EXPR_AST::read(tok, lexer));
-    } else {
-        return new MULT_EXPR_AST(first, nullptr, nullptr);
+        left_unary_exprs.push_back(std::make_pair(LEFT_UNARY_EXPR_AST::read(tok, lexer), DOMAIN_TAG::END_OF_FILE));
     }
+    return new MULT_EXPR_AST(left_unary_exprs);
 }
 
-MULT_EXPR_AST::MULT_EXPR_AST(LEFT_UNARY_EXPR_AST*first, DOMAIN_TAG*mult_op, MULT_EXPR_AST*second) : first(first), mult_op(mult_op), second(second) {}
+MULT_EXPR_AST::MULT_EXPR_AST(std::vector<std::pair<LEFT_UNARY_EXPR_AST*, DOMAIN_TAG>> left_unary_exprs) : left_unary_exprs(left_unary_exprs) {}
 
-LEFT_UNARY_EXPR_AST*MULT_EXPR_AST::get_first() { return first; }
-DOMAIN_TAG*MULT_EXPR_AST::get_mult_op() { return mult_op; }
-MULT_EXPR_AST*MULT_EXPR_AST::get_second() { return second; }
+std::vector<std::pair<LEFT_UNARY_EXPR_AST*, DOMAIN_TAG>> MULT_EXPR_AST::get_left_unary_exprs() { return left_unary_exprs; }
+void MULT_EXPR_AST::set_left_unary_exprs(std::vector<std::pair<LEFT_UNARY_EXPR_AST*, DOMAIN_TAG>> left_unary_exprs) { this->left_unary_exprs = left_unary_exprs; }
 
 MULT_EXPR_AST::~MULT_EXPR_AST()
 {
-    delete first;
-    if (mult_op != nullptr) {
-        delete mult_op;
-        delete second;
-    }
+   for (std::size_t i = 0; i < left_unary_exprs.size(); i++) {
+       delete left_unary_exprs[i].first;
+   }
 }
 
 std::ostream& operator<<(std::ostream &strm, MULT_EXPR_AST &expr)
@@ -122,32 +88,21 @@ std::ostream& operator<<(std::ostream &strm, MULT_EXPR_AST &expr)
     }
     
     strm << tabs_str << "MULT EXPR BEGIN:" << std::endl;
-    // first.
-    expr.first->add_tab(expr.tabs + 1);
-    strm << *(expr.first);
-    expr.first->del_tab(expr.tabs + 1);
-    if (expr.mult_op != nullptr) {
-        // mult_op.
-        switch (*expr.mult_op) {
-        case DOMAIN_TAG::MUL:
+    expr.left_unary_exprs[0].first->add_tab(expr.tabs + 1);
+    strm << *(expr.left_unary_exprs[0].first);
+    expr.left_unary_exprs[0].first->del_tab(expr.tabs + 1);
+    for (std::size_t i = 1; i < expr.left_unary_exprs.size(); i++) {
+        if (expr.left_unary_exprs[i - 1].second == DOMAIN_TAG::MUL) {
             strm << tabs_str << "*" << std::endl;
-            break;
-        case DOMAIN_TAG::DIV:
+        } else if (expr.left_unary_exprs[i - 1].second == DOMAIN_TAG::DIV) {
             strm << tabs_str << "/" << std::endl;
-            break;
-        case DOMAIN_TAG::MOD:
+        } else if (expr.left_unary_exprs[i - 1].second == DOMAIN_TAG::MOD) {
             strm << tabs_str << "%" << std::endl;
-            break;
-        default:
-            // do nothing.
-            break;
         }
-        // second.
-        expr.second->add_tab(expr.tabs + 1);
-        strm << *(expr.second);
-        expr.second->del_tab(expr.tabs + 1);
+        expr.left_unary_exprs[i].first->add_tab(expr.tabs + 1);
+        strm << *(expr.left_unary_exprs[i].first);
+        expr.left_unary_exprs[i].first->del_tab(expr.tabs + 1);
     }
-    
     strm << tabs_str << "MULT EXPR END;" << std::endl;
     return strm;
 }

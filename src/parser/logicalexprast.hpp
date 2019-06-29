@@ -13,16 +13,15 @@ class LOGICAL_AND_EXPR_AST;
 class LOGICAL_OR_EXPR_AST : public AST
 {
   private:
-    LOGICAL_AND_EXPR_AST*first;
-    LOGICAL_OR_EXPR_AST*second;
+    std::vector<LOGICAL_AND_EXPR_AST*> and_exprs;
 
   public:
     static LOGICAL_OR_EXPR_AST*read(TOKEN**tok, LEXER*lexer);
     
-    LOGICAL_OR_EXPR_AST(LOGICAL_AND_EXPR_AST*first, LOGICAL_OR_EXPR_AST*second);
+    LOGICAL_OR_EXPR_AST(std::vector<LOGICAL_AND_EXPR_AST*> and_exprs);
 
-    LOGICAL_AND_EXPR_AST*get_first();
-    LOGICAL_OR_EXPR_AST*get_second();
+    std::vector<LOGICAL_AND_EXPR_AST*> get_and_exprs();
+    void set_and_exprs(std::vector<LOGICAL_AND_EXPR_AST*> and_exprs);
 
     ~LOGICAL_OR_EXPR_AST();
 
@@ -34,16 +33,15 @@ class EQ_EXPR_AST;
 class LOGICAL_AND_EXPR_AST : public AST
 {
   private:
-    EQ_EXPR_AST*first;
-    LOGICAL_AND_EXPR_AST*second;
+    std::vector<EQ_EXPR_AST*> eq_exprs;
 
   public:
     static LOGICAL_AND_EXPR_AST*read(TOKEN**tok, LEXER*lexer);
     
-    LOGICAL_AND_EXPR_AST(EQ_EXPR_AST*first, LOGICAL_AND_EXPR_AST*second);
+    LOGICAL_AND_EXPR_AST(std::vector<EQ_EXPR_AST*> eq_exprs);
 
-    EQ_EXPR_AST*get_first();
-    LOGICAL_AND_EXPR_AST*get_second();
+    std::vector<EQ_EXPR_AST*> get_eq_exprs();
+    void set_eq_exprs(std::vector<EQ_EXPR_AST*> eq_exprs);
 
     ~LOGICAL_AND_EXPR_AST();
 
