@@ -54,7 +54,7 @@ Classical code-generation algorithm, which firstly creates Control Flow Graph (`
 
 ### Examples
 
-- Check is number is even
+- Check if number is even
 
   |       Code                     |                SSA              |
   |--------------------------------|---------------------------------|
