@@ -55,16 +55,19 @@ Classical code-generation algorithm, which firstly creates Control Flow Graph (`
 ### Examples
 
 - Check is number is even
+
   |       Code                     |                SSA              |
   |--------------------------------|---------------------------------|
   | ![in](static/examples/01_in.jpg) | ![out](static/examples/01_out.jpg) |
 
 - Get sign of number
+
   |       Code                     |                SSA              |
   |--------------------------------|---------------------------------|
   | ![in](static/examples/01_in.jpg) | ![out](static/examples/01_out.jpg) |
 
 - Fibonacci
+
   |       Code                     |                SSA              |
   |--------------------------------|---------------------------------|
   | ![in](static/examples/01_in.jpg) | ![out](static/examples/01_out.jpg) |
