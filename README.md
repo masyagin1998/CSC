@@ -54,20 +54,23 @@ Classical code-generation algorithm, which firstly creates Control Flow Graph (`
 
 ### Examples
 
-- Check is number is even
+- Check if number is even
+
   |       Code                     |                SSA              |
   |--------------------------------|---------------------------------|
   | ![in](static/examples/01_in.jpg) | ![out](static/examples/01_out.jpg) |
 
 - Get sign of number
+
   |       Code                     |                SSA              |
   |--------------------------------|---------------------------------|
-  | ![in](static/examples/01_in.jpg) | ![out](static/examples/01_out.jpg) |
+  | ![in](static/examples/02_in.jpg) | ![out](static/examples/02_out.jpg) |
 
 - Fibonacci
+
   |       Code                     |                SSA              |
   |--------------------------------|---------------------------------|
-  | ![in](static/examples/01_in.jpg) | ![out](static/examples/01_out.jpg) |
+  | ![in](static/examples/03_in.jpg) | ![out](static/examples/03_out.jpg) |
 
 ### Many thanks to:
 Anatoly Sinyavin - BMSTU Optimal Code Generation teacher
