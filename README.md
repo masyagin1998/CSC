@@ -8,7 +8,7 @@ It contains lexer, parser, llvm-ir-codegenerator and SSA-form-builder.
 
 * [LLVM](https://llvm.org/) - Framework for building compilers and codegenerators.
 
-And of course `CSC` itself is open source with a [public repository][dill]
+And of course `CSC` itself is open source with a [public repository](https://github.com/masyagin1998/CSC)
  on GitHub.
 
 ### Installation
